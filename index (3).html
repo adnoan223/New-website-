@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TempMail by Adnoo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #141E30, #243B55);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8.5px);
+    }
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .email-box {
+      background: #1e1e2f;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+    button {
+      background-color: #ff4757;
+      color: white;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ff6b81;
+    }
+    .message {
+      background-color: #2f3542;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Temp Email Generator</h1>
+    <div class="email-box" id="emailDisplay">Loading...</div>
+    <button onclick="copyEmail()">Copy Email</button>
+    <h2>Inbox</h2>
+    <div id="inbox"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/gh/juanfont/headless-mailjs@main/dist/index.min.js"></script>
+  <script>
+    const inbox = document.getElementById("inbox");
+    let emailDisplay = document.getElementById("emailDisplay");
+    let mailjs;
+
+    async function initMail() {
+      mailjs = new Mailjs();
+      const account = await mailjs.register(); // generates random email
+      await mailjs.login(account.address, account.password);
+
+      emailDisplay.innerText = account.address;
+
+      setInterval(async () => {
+        const messages = await mailjs.getMessages();
+        inbox.innerHTML = messages.length === 0 ? '<p>No messages yet.</p>' : '';
+        messages.forEach(msg => {
+          const div = document.createElement("div");
+          div.classList.add("message");
+          div.innerHTML = `<strong>From:</strong> ${msg.from.address}<br><strong>Subject:</strong> ${msg.subject}`;
+          inbox.appendChild(div);
+        });
+      }, 5000);
+    }
+
+    function copyEmail() {
+      navigator.clipboard.writeText(emailDisplay.innerText);
+      alert("Email copied to clipboard!");
+    }
+
+    initMail();
+  </script>
+</body>
+</html>
